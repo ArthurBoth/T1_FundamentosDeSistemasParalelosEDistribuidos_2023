@@ -22,8 +22,6 @@
 
 package main
 
-//---------------------------
-
 var x, y, z int = 0, 0, 0
 
 func px() {

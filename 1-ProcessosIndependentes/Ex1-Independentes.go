@@ -1,7 +1,7 @@
 /* por Fernando Dotti - fldotti.github.io - PUCRS - Escola Politécnica
  EXERCÍCIO:  dado o programa abaixo
     1) quantos processos concorrentes são gerados ?
-		R: 41, um para cada chamada da funcaoA (definida em N) e um para o main
+		R: 41, um para cada chamada da 'funcaoA' (definida em N) e um para o 'main'
     2) execute e observe: que se pode supor sobre a velocidade relativa dos mesmos ?
 		R: Cada processo executa em uma velocidade própria inpependente de outros processos,
 			 mas todos ao mesmo tempo
