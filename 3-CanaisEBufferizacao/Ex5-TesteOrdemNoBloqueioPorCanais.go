@@ -1,19 +1,20 @@
-// por Fernando Dotti - fldotti.github.io - PUCRS - Escola Politécnica
-// Este é um teste da semantica quando processos bloqueiam em um canal.
-//
-// Suponha que voce tem muitos processos bloqueados tentando escrever em um canal.
-// QUESTAO: Será que o processo que está bloqueado há mais tempo é o
-//          que ganha o direito de escrever no canal antes dos demais bloqueados ?
-//          ou seja, o atendimento dos bloqueados é FIFO ?
-// A especificação da linguagem, tanto quanto pude avaliar, nao aborda este aspecto.
-// Isto é um teste.   Não serve como *prova* de que o comportamento é este.
-// EXERCICIO:
-//     1) leia o programa, execute e veja o resultado.  Qual a sua conclusão ?
-// OBSERVACAO:
-//    Para "aumentar a probabilidade" de que os processos se bloqueiem na ordem de seu
-//    identificador, entre a criação de um processo e outro, main faz sleep.
-//    Veja mais comentarios na linha do sleep.
-
+/* por Fernando Dotti - fldotti.github.io - PUCRS - Escola Politécnica
+   Este é um teste da semantica quando processos bloqueiam em um canal.
+  
+   Suponha que voce tem muitos processos bloqueados tentando escrever em um canal.
+   QUESTAO: Será que o processo que está bloqueado há mais tempo é o
+            que ganha o direito de escrever no canal antes dos demais bloqueados ?
+            ou seja, o atendimento dos bloqueados é FIFO ?
+   A especificação da linguagem, tanto quanto pude avaliar, nao aborda este aspecto.
+   Isto é um teste.   Não serve como *prova* de que o comportamento é este.
+   EXERCICIO:
+       1) leia o programa, execute e veja o resultado.  Qual a sua conclusão ?
+	      R: O programa funciona sem problemas, e o resultado é que os processos agem em ordem de id.
+   OBSERVACAO:
+      Para "aumentar a probabilidade" de que os processos se bloqueiem na ordem de seu
+      identificador, entre a criação de um processo e outro, main faz sleep.
+      Veja mais comentarios na linha do sleep.
+*/
 package main
 
 import (

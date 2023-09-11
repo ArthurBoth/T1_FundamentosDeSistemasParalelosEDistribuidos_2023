@@ -1,19 +1,21 @@
-// por Fernando Dotti - fldotti.github.io - PUCRS - Escola Politécnica
-// >>> veja o Ex1 desta serie
-// ASSUNTO - Compreensão de concorrência e canais com buffer
-//
-// EXERCÍCIO:
-//     ...
-//     3) Faça uma versão que tem vários processos destino
-//        que podem consumir os dados de forma não determinística.
-//        Ou seja, processos diferentes podem consumir quantidades
-//        diferentes de itens,  conforme sua velocidade.
-//        Como você coordenaria o término dos processos depois do
-//        consumo dos N valores ?
-// SOLUCAO:
-//        possivel abaixo.
-// EXERCÍCIO:
-//     4) como seria a adição de um numero maior de destinos ?
+/* por Fernando Dotti - fldotti.github.io - PUCRS - Escola Politécnica
+   >>> veja o Ex1 desta serie
+   ASSUNTO - Compreensão de concorrência e canais com buffer
+  
+   EXERCÍCIO:
+       ...
+       3) Faça uma versão que tem vários processos destino
+          que podem consumir os dados de forma não determinística.
+          Ou seja, processos diferentes podem consumir quantidades
+          diferentes de itens,  conforme sua velocidade.
+          Como você coordenaria o término dos processos depois do
+          consumo dos N valores ?
+   SOLUCAO:
+          possivel abaixo.
+   EXERCÍCIO:
+       4) como seria a adição de um numero maior de destinos ?
+	   	  R: Criando mais goRoutines de destino e fazendo a fonteDeDados escrever mais vezes no canal de finalização.
+*/
 
 package main
 
@@ -25,8 +27,9 @@ func fonteDeDados(saida chan int, n int, fin chan struct{}) {
 		println(i, " -> ")
 		saida <- i
 	}
-	fin <- struct{}{}
-	fin <- struct{}{}
+	for i := 0; i < 5; i++ {
+		fin <- struct{}{}
+	}
 }
 
 func destinoDosDados(entrada chan int, fin chan struct{}) {
@@ -44,6 +47,9 @@ func main() {
 	c := make(chan int, tamBuff)
 	fin := make(chan struct{})
 	go fonteDeDados(c, N, fin)
+	go destinoDosDados(c, fin)
+	go destinoDosDados(c, fin)
+	go destinoDosDados(c, fin)
 	go destinoDosDados(c, fin)
 	destinoDosDados(c, fin)
 }
