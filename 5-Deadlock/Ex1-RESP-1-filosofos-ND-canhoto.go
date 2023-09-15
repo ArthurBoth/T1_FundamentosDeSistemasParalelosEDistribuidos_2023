@@ -1,10 +1,14 @@
-// PUCRS - Fernando Dotti
-// Exercício:
-//   1) que condição de coffman é quebrada com a solução abaixo ?
-//   2) argumente em portugues porque esta solução não tem deadlock.
-//   3) voce poderia ter mais filósofos canhotos ?
-//           implemente e teste.
-
+/* PUCRS - Fernando Dotti
+   Exercício:
+     1) que condição de coffman é quebrada com a solução abaixo ?
+	  R: A de espera circular.
+     2) argumente em portugues porque esta solução não tem deadlock.
+	  R: A solução não possui Deadlock pois o filósofo canhoto começa pelo garfo da sua esquerda
+	  	 e não pegará o da direita até ter o da esquerda, evitando assim o deadlock.
+     3) voce poderia ter mais filósofos canhotos ?
+	  R: Sim, desde que o sempre hajam filósofos destros e canhotos
+             implemente e teste.
+*/
 package main
 
 import (
@@ -13,6 +17,7 @@ import (
 )
 
 const (
+	LEFTHANDED = 2
 	PHILOSOPHERS = 5
 	FORKS        = 5
 )
@@ -36,12 +41,14 @@ func main() {
 		fork_channels[i] = make(chan struct{}, 1)
 		fork_channels[i] <- struct{}{} // no inicio garfo esta livre
 	}
-	for i := 0; i < (PHILOSOPHERS - 1); i++ {
+	for i := 0; i < (PHILOSOPHERS - LEFTHANDED); i++ {
 		fmt.Println("Filosofo " + strconv.Itoa(i) + " destro!")
 		go philosopher(i, fork_channels[i], fork_channels[(i+1)])
 	}
-	fmt.Println("Filosofo " + strconv.Itoa(PHILOSOPHERS-1) + " canhoto!")
-	go philosopher(PHILOSOPHERS-1, fork_channels[0], fork_channels[FORKS-1])
+	for i := (PHILOSOPHERS - LEFTHANDED); i < (PHILOSOPHERS); i++ {
+		fmt.Println("Filosofo " + strconv.Itoa(i) + " canhoto!")
+		go philosopher(i, fork_channels[i], fork_channels[(i+1)%FORKS])
+	}
 
 	<-make(chan struct{})
 }

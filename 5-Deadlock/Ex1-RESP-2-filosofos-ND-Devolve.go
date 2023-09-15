@@ -1,8 +1,10 @@
-// PUCRS - Fernando Dotti
-// Exercício:
-//   1) que condição de coffman é quebrada com a solução abaixo ?
-//   2) que outro problema ela introduz ?
-
+/* PUCRS - Fernando Dotti
+   Exercício:
+     1) que condição de coffman é quebrada com a solução abaixo ?
+	   R: A se segurar e esperar.
+     2) que outro problema ela introduz ?
+	  R: Os filósofos comem menos.
+*/
 package main
 
 import (
@@ -51,7 +53,7 @@ func main() {
 		fork_channels[i] = make(chan struct{}, 1)
 		fork_channels[i] <- struct{}{} // no inicio garfo esta livre
 	}
-	for i := 0; i < (PHILOSOPHERS - 1); i++ {
+	for i := 0; i < (PHILOSOPHERS); i++ {
 		go philosopher(i, fork_channels[i], fork_channels[(i+1)%PHILOSOPHERS])
 	}
 	var blq chan struct{} = make(chan struct{})

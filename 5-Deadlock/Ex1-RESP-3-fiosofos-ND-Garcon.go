@@ -1,12 +1,12 @@
-// PUCRS - Fernando Dotti
-// Filosofos.  Cada vez que filosofo acaba de comer, levanta da mesa
-// e pensa caminhando.   Quando fica com fome, tenta sentar novamente.
-// Mas um garçom (waiter) deixa somente 4 filósofos estarem na mesa.
-// Exercicios:
-//     Veja como o waiter foi modelado.
-//     Note o uso de canais como sendo um conjunto de creditos e
-//     como o credito é tomado e devolvido pelo filosofo.
-
+/* PUCRS - Fernando Dotti
+   Filosofos.  Cada vez que filosofo acaba de comer, levanta da mesa
+   e pensa caminhando.   Quando fica com fome, tenta sentar novamente.
+   Mas um garçom (waiter) deixa somente 4 filósofos estarem na mesa.
+   Exercicios:
+       Veja como o waiter foi modelado.
+       Note o uso de canais como sendo um conjunto de creditos e
+       como o credito é tomado e devolvido pelo filosofo.
+*/
 package main
 
 import (

@@ -1,14 +1,14 @@
-// PUCRS - Fernando Dotti
-//  Um sistema tem um gerador de dados que solicita a um processo Fonte enviar dados
-//  para um processo Destino.
-//  A cada dado recebido, o Destino manda uma confirmação para a Fonte.
-//  Note que isto é uma modelagem de um sistema onde a confirmacao seria importante.
-//  Com canais não existe necessidade de confirmacao de recepcao pois nenhum dado é perdido.
-//
-//  Exercício:
-//  Rode este sistema e veja se algum problema ocorre.
-//  Corrija o problema.
-
+/* PUCRS - Fernando Dotti
+    Um sistema tem um gerador de dados que solicita a um processo Fonte enviar dados
+    para um processo Destino.
+    A cada dado recebido, o Destino manda uma confirmação para a Fonte.
+    Note que isto é uma modelagem de um sistema onde a confirmacao seria importante.
+    Com canais não existe necessidade de confirmacao de recepcao pois nenhum dado é perdido.
+  
+    Exercício:
+    Rode este sistema e veja se algum problema ocorre.
+    Corrija o problema.
+*/
 package main
 
 import (
@@ -32,12 +32,11 @@ func Gerador() {
 func Fonte() {
 	contConf := 0
 	for {
-		select {
-		case x := <-solicitaEnvio:
-			envia <- x
-		case <-confirma:
-			contConf++
-		}
+		x := <-solicitaEnvio
+		envia <- x
+		
+		<-confirma
+		contConf++
 	}
 }
 
@@ -54,5 +53,5 @@ func main() {
 	go Fonte()
 	fmt.Println()
 	go Destino()
-	<-make(chan struct{}, 0)
+	<-make(chan struct{})
 }
