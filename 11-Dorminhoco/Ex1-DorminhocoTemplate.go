@@ -1,21 +1,13 @@
-/* por Arthur Antunes de Souza Both e Gabriel Moraes Ferreira
-
-     Um template para criar um anel generico.
-     Adapte para o problema do dorminhoco.
-     Nada está dito sobre como funciona a ordem de processos que batem.
-     O ultimo leva a rolhada ...
-     ESTE  PROGRAMA NAO FUNCIONA.    É UM RASCUNHO COM DICAS.
-*/
+/* por Arthur Antunes de Souza Both e Gabriel Moraes Ferreira */
 
 package main
 
 import (
 	"fmt"
 	"math/rand"
-	"time"
 )
 
-var fin = make(chan struct{})
+var fin = make(chan int)
 
 const NJ = 5           // numero de jogadores
 const M = 4            // numero de cartas
@@ -24,39 +16,38 @@ type carta string      // carta é um string
 
 var ch [NJ]chan carta  // NJ canais de itens tipo carta  
 
-var bateu = make(chan struct{}, NJ) // avisa que bateu
-var countEnds = 1 // contador de jogadores que já bateram (inicia em 1)
+var bateu = make(chan struct{}, 1) // avisa que bateu
 var createPlayers = make(chan struct{}, NJ)
 
 func jogador(id int, in chan carta, out chan carta, cartasIniciais []carta) {
 	createPlayers <- struct{}{}
 	mao := cartasIniciais
-    var cartaRecebida carta
 	var cartaEnviada carta
+	var cartaRecebida carta
+	var aux []carta = make([]carta, 0) // mão auxiliar que existe por causa de ponteiros de slice
 	
 
-	fmt.Printf("[%d] Mão inicial(jogador): %v\n",id,mao)
 	for {
 		select {
 		case cartaRecebida = <- in:
-			fmt.Printf("[%d] Mão mais antes(jogador): %v\n",id,mao)
-			fmt.Printf("[%d] recebeu \"%s\"\n", id, cartaRecebida)
-
-			cartaEnviada = choice(mao)
-			fmt.Printf("[%d] Mão antes(jogador): %v\n",id,mao)
-			mao = append(mao, cartaRecebida)
-			fmt.Printf("[%d] Mão meio(jogador): %v\n",id,mao)
-			mao = remove(mao, cartaEnviada)
-			fmt.Printf("[%d] Mão depois(jogador): %v\n",id,mao)
 			
-			fmt.Printf("[%d] enviou \"%s\" para [%d]\n", id, cartaEnviada, (id+1)%NJ)
-			out <- cartaEnviada
+			cartaEnviada = mao[choice(mao)]
+			aux = append(mao, cartaRecebida)
+			mao = remove(aux, cartaEnviada)
+			
 		case <- bateu:
-			bater(id)
-		default:/*
+			go bater(id)
+			return
+		default:
+			if (cartaEnviada != ""){
+				fmt.Printf("[%d] enviou \033[36m%s\033[0m para [%d]\n", id, cartaEnviada, (id+1)%NJ)
+				out <- cartaEnviada
+				cartaEnviada = ""
+			}
 			if checkEnd(mao) {
-				bater(id)
-			}*/
+				go bater(id)
+				return
+				}
 		}
 	}
 }
@@ -66,7 +57,7 @@ func main() {
 	fmt.Println("baralho: ",baralho)
 	
 	for i := 0; i < NJ; i++ {
-		ch[i] = make(chan carta)
+		ch[i] = make(chan carta, 1)
 	}
 	
 	for i := 0; i < NJ; i++ {
@@ -75,23 +66,26 @@ func main() {
 		fmt.Printf("[%d] Mão inicial(main): %v\n",i ,cartasEscolhidas)
 		go jogador(i, ch[i], ch[(i+1)%NJ], cartasEscolhidas)
 	}
-		fmt.Println("\n")
-
+	
 	for i := 0; i < NJ; i++ {
 		<- createPlayers
 	}
+
+	fmt.Println("\n")
+
 	ch[0] <- baralho[0]
-	time.Sleep(50 * time.Millisecond)
-	//fim()
+
+	fim()
 }
 
 //--------------------------------------------------------
-func choice(mao []carta) carta {
-	if (contains(mao, "Joker")){
-		return "Joker"
+func choice(mao []carta) int {
+	jokerIndex := index(mao, "@")
+	if (jokerIndex >= 0){
+		return jokerIndex
 	}
-	var c int = rand.Intn(len(mao))
-	return mao[c]
+
+	return rand.Intn(len(mao))
 }
 
 func index(mao []carta, c carta) int {
@@ -103,28 +97,21 @@ func index(mao []carta, c carta) int {
 	return -1
 }
 
-func contains(mao []carta, x carta) bool {
-	for _, n := range mao {
-		if x == n {
-			return true
-		}
-	}
-	return false
-}
-
 func remove(mao []carta, c carta) []carta {
+	ret := make([]carta, 0)
+	aux := make([]carta, 0)
 	i := index(mao, c)
-    mao[i] = mao[len(mao)-1]
-    return mao[:len(mao)-1]
+
+	aux = append(aux, mao...)
+
+    aux[i] = mao[len(mao)-1]
+	ret = append(ret, aux[:len(aux)-1]...)
+    return ret
 }
 
 func bater(id int) {
-	fmt.Printf("[%d] bateu\n", id)
-	for i := 0; i < (NJ-countEnds); i++ {
-		bateu <- struct{}{}
-	}
-	countEnds++
-	fin <- struct{}{}
+	bateu <- struct{}{}
+	fin <- id
 }
 
 func checkEnd(mao []carta) bool {
@@ -144,13 +131,13 @@ func makeDeck() []carta {
 			deck = append(deck, carta(fmt.Sprintf("%d",i)))
 		}
 	}
-	deck = append(deck, "Joker") // coringa
+	deck = append(deck, "@") // coringa
 	deck = shuffle(deck)
 	return deck
 }
 
 func shuffle(deck []carta) []carta{
-	for i := range deck { // embaralha
+	for i := range deck {
 		j := rand.Intn(i + 1)
 		deck[i], deck[j] = deck[j], deck[i]
 	}
@@ -158,7 +145,36 @@ func shuffle(deck []carta) []carta{
 }
 
 func fim() {
+	var players []int
+
 	for i := 0; i < NJ; i++ {
-		<- fin
+		players = append(players, i)
 	}
+
+	for i := 0; i < NJ-1; i++ {
+		id := <- fin
+		fmt.Printf("\033[33m[%d] bateu\n\033[0m", id)
+		players = removeIndex(players, id)
+	}
+
+	fmt.Printf("\033[31m%v é o dorminhoco\n\033[0m", players)
+}
+
+func removeIndex(slice []int, id int) []int {
+	index := findIndex(slice, id)
+
+	ret := make([]int, 0)
+	ret = append(ret, slice[:index]...)
+	ret = append(ret, slice[index+1:]...)
+
+	return ret
+}
+
+func findIndex(slice []int, index int) int {
+	for i, n := range slice {
+		if n == index {
+			return i
+		}
+	}
+	return -1
 }
